@@ -31,3 +31,11 @@ const runtime = new Runtime();
 const main = runtime.module(define);
 main.value("foo").then(value => console.log(value));
 ~~~
+
+## Deploying to GitHub Pages
+
+This repository includes a GitHub Actions workflow that publishes the static files in this folder to GitHub Pages whenever changes are pushed to the `main` or `work` branches.
+
+1. In your repository settings, enable **Pages** with the **GitHub Actions** source.
+2. Push to `main` (or `work`) to trigger the deployment workflow.
+3. The workflow uploads the contents of the repository root as the site artifact and deploys it to GitHub Pages.
