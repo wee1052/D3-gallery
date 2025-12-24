@@ -47,6 +47,8 @@ function _chart(d3,data)
       .y(d => y(d.births))
       .defined(d => d.births != null);
 
+  const points = sexes.flatMap(({sex, values}) => values.map(d => ({...d, sex})));
+
   const svg = d3.create("svg")
       .attr("width", width)
       .attr("height", height)
@@ -101,6 +103,45 @@ function _chart(d3,data)
       .attr("text-anchor", "end")
       .attr("fill", "currentColor")
       .text("年份");
+
+  const tooltip = svg.append("g")
+      .attr("display", "none");
+
+  tooltip.append("circle")
+      .attr("r", 5)
+      .attr("fill", "white")
+      .attr("stroke", "currentColor")
+      .attr("stroke-width", 1.5);
+
+  const tooltipText = tooltip.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "-0.8em")
+      .attr("font-size", 12)
+      .attr("font-weight", "bold")
+      .attr("paint-order", "stroke")
+      .attr("stroke", "white")
+      .attr("stroke-width", 3);
+
+  function pointermoved(event) {
+    const [px, py] = d3.pointer(event, svg.node());
+    const closest = d3.least(points, d => Math.hypot(x(d.year) - px, y(d.births) - py));
+
+    tooltip.attr("transform", `translate(${x(closest.year)},${y(closest.births)})`);
+    tooltipText.text(`${closest.year} ${closest.sex}：${closest.births.toLocaleString("en-US")}`);
+    tooltip.attr("display", null);
+  }
+
+  function pointerleft() {
+    tooltip.attr("display", "none");
+  }
+
+  svg.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .on("pointerenter pointermove", pointermoved)
+      .on("pointerleave", pointerleft);
 
   return Object.assign(svg.node(), {scales: {color}});
 }
